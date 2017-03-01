@@ -17,13 +17,15 @@ var engine = Engine.create();
 });
 var world = engine.world;
 
+var docWidth = document.documentElement.clientWidth;
+var docHeight = document.documentElement.clientHeight;
 
 var render = Render.create({
     element: document.body,
     engine: engine,
     options: {
-        width: Math.min(document.documentElement.clientWidth),
-        height: Math.min(document.documentElement.clientHeight),
+        width: docWidth,
+        height: docHeight,
     }
 });
 
@@ -36,29 +38,62 @@ Runner.run(runner, engine);
 //
 
 var topLocation = {
-    x : Math.min(document.documentElement.clientWidth)/2,
-    y : Math.min(document.documentElement.clientHeight)/2
-}
+    x : docWidth/2,
+    y : docHeight/2
+};
 
-var ball1 = Bodies.rectangle(topLocation.x, topLocation.y + 50, 10, 100, { density: 0.1, friction:0, frictionAir: 0, collisionFilter: {group: -1}});
-var ball2 = Bodies.rectangle(topLocation.x, topLocation.y + 140, 10, 100, { density: 0.1, friction:0, frictionAir: 0, collisionFilter: {group: -1}});
+var rectangle1Width, rectangle1Height, rectangle2Width, rectangle2Height;
+rectangle1Width = rectangle2Width = 10;
+rectangle1Height = rectangle2Height= 100;
+
+var physicalGapBetweenBodies = -10;
+var gapBetweenCenterOfBodies = rectangle1Height/2 + rectangle2Height/2 + physicalGapBetweenBodies; // 10 negative gap to make a ~hinge
+
+var rectangle1 = Bodies.rectangle(
+    topLocation.x,                      // Location of the center of the body.
+    topLocation.y,
+    rectangle1Width, rectangle1Height,
+    {
+        density: 0.1,
+        friction:0,
+        frictionAir: 0,
+        collisionFilter: {
+            group: -1
+        }
+    }
+);
+
+var rectangle2 = Bodies.rectangle(
+    topLocation.x,
+    topLocation.y + gapBetweenCenterOfBodies,
+    rectangle2Width,
+    rectangle2Height,
+    {
+        density: 0.1,
+        friction:0,
+        frictionAir: 0,
+        collisionFilter: {
+            group: -1
+        }
+    }
+);
 
 
-World.add(world, ball1);
-World.add(world, ball2);
+World.add(world, rectangle1);
+World.add(world, rectangle2);
 
 World.add(world, Constraint.create({
-    pointA: { x: topLocation.x , y: topLocation.y},
-    pointB: { x: 0, y: -50},
-    bodyB: ball1,
+    pointA: { x: topLocation.x , y: topLocation.y - rectangle1Height/2}, // Make the constraint connect at the top of the obj
+    pointB: { x: 0, y: -rectangle1Height/2}, // position of the constraint
+    bodyB: rectangle1,
     stiffness: 1
 }));
 
 World.add(world, Constraint.create({
-    bodyA: ball1,
-    pointA: { x: 0, y: 45},
-    bodyB: ball2,
-    pointB: { x: 0, y: -45},
+    bodyA: rectangle1,
+    pointA: { x: 0, y: (rectangle1Height + physicalGapBetweenBodies)/2}, // just above the bottom of the body
+    bodyB: rectangle2,
+    pointB: { x: 0, y: -(rectangle2Height + physicalGapBetweenBodies)/2}, // just below the top of the body
     stiffness: 1
 }));
 
