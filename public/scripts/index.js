@@ -7,14 +7,22 @@ var Engine = Matter.Engine,
     Constraint = Matter.Constraint,
     Bodies = Matter.Bodies;
 
-var engine = Engine.create();
-    engine.world = World.create({
+var engineOptions = {
+    positionIterations: 100,
+    velocityIterations: 100,
+    constraintIterations: 100
+};
+
+var worldOptions = {
     gravity: {
         x: 0,
         y: 1,
         scale: 0.005
     }
-});
+}
+
+var engine = Engine.create();
+engine.world = World.create();
 var world = engine.world;
 
 var docWidth = document.documentElement.clientWidth;
